@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex" />
+  <meta name="googlebot" content="noindex,nofollow,noarchive,nosnippet,noimageindex" />
+  <title>MyOS — Recruitment Concept · Maria Szczudło</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f8fc;color:#172033}.gate{min-height:100vh;display:grid;place-items:center;padding:24px}.gate-card{width:min(480px,100%);background:white;border:1px solid #dfe5ef;border-radius:18px;padding:34px;box-shadow:0 18px 50px rgba(27,39,72,.08)}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#315adf;margin-bottom:12px}.gate h1{font-size:28px;line-height:1.15;margin:0 0 12px}.gate p{font-size:15px;line-height:1.55;color:#667085;margin:0 0 20px}.gate label{display:block;font-size:13px;font-weight:700;margin-bottom:8px}.gate input{width:100%;height:46px;border:1px solid #cfd7e6;border-radius:10px;padding:0 13px;font-size:16px;outline:none}.gate input:focus{border-color:#315adf;box-shadow:0 0 0 3px rgba(49,90,223,.12)}.gate button{width:100%;height:46px;border:0;border-radius:10px;background:#315adf;color:white;font-size:15px;font-weight:750;margin-top:12px;cursor:pointer}.gate button:hover{filter:brightness(.96)}.error{min-height:20px;color:#b42318!important;font-size:13px!important;margin:8px 0 0!important}.legal{border-top:1px solid #edf0f5;margin-top:22px;padding-top:16px;font-size:11px!important;color:#8a94a6!important}.hidden{display:none!important}
+  </style>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="access-gate" class="gate">
+    <main class="gate-card" aria-labelledby="gate-title">
+      <div class="eyebrow">Recruitment evaluation · Private concept</div>
+      <h1 id="gate-title">MyOS — Trusted Autonomy</h1>
+      <p>Interactive product UX exploration by Maria Szczudło. Enter the access password provided with the recruitment materials.</p>
+      <form id="gate-form">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" autofocus />
+        <button type="submit">Open prototype</button>
+        <p id="gate-error" class="error" role="alert"></p>
+      </form>
+      <p class="legal">Confidential recruitment material. Shared solely for evaluation within the recruitment process. Please do not distribute, reproduce or use this concept for commercial purposes without the author’s written permission.</p>
+    </main>
+  </div>
+  <div id="app" class="hidden"></div>
+  <script type="module">
+    const EXPECTED = 'e74c50e58b37d6d668db5e2b933830c8c2f949ea1842b61d4dc4ac992c07f0b8';
+    const gate = document.getElementById('access-gate');
+    const app = document.getElementById('app');
+    async function digest(value){
+      const data = new TextEncoder().encode(value);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    async function unlock(){
+      gate.classList.add('hidden'); app.classList.remove('hidden');
+      await import('./src/main.js');
+    }
+    if(sessionStorage.getItem('myos_recruitment_access')==='granted') unlock();
+    document.getElementById('gate-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const value=document.getElementById('password').value;
+      if(await digest(value)===EXPECTED){
+        sessionStorage.setItem('myos_recruitment_access','granted');
+        unlock();
+      } else {
+        document.getElementById('gate-error').textContent='Incorrect password. Please use the password included in the recruitment email.';
+      }
+    });
+  </script>
+</body>
+</html>
